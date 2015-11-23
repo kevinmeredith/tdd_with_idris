@@ -11,7 +11,12 @@ two xs = ?unknownTwo
 three : (xs : Vect (n + 1) elem) -> Vect n elem
 three {n} xs = Data.Vect.take n xs
 
-data Word = Foo | Bar
+data DoorState = DOpen | DClosed
 
-f : Word -> Bool
-f Foo = True
+data DoorAction = DoOpen | DoClose
+
+getValidState : DoorState -> Type
+getValidState DOpen   = DoClose
+getValidState DClosed = DoOpen
+
+runDoorOperation : DoorState -> DoorAction -> DoorState
