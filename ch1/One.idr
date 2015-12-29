@@ -13,10 +13,10 @@ three {n} xs = Data.Vect.take n xs
 
 data DoorState = DOpen | DClosed
 
-data DoorAction = DoOpen | DoClose
+data DoorAction : DoorState -> DoorState -> Type where
+  Open  : DoorAction DClosed DOpen
+  Close : DoorAction DOpen DClosed
 
-getValidState : DoorState -> Type
-getValidState DOpen   = DoClose
-getValidState DClosed = DoOpen
-
-runDoorOperation : DoorState -> DoorAction -> DoorState
+data Interaction : DoorState -> DoorState -> Type where
+  Nil  : Interaction a b
+  Cons : DoorAction a b -> Interaction b c -> Interaction a c
