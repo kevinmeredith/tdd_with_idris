@@ -1,3 +1,4 @@
+-- credit: TDD with Idris
 module Average
 
 average : String -> Double
