@@ -6,10 +6,6 @@ import Data.Vect
 addHelper : (Num n) => Vect k n -> Vect k n -> Vect k n
 addHelper = zipWith (+)
 
--- add : (Num n) => Vect rows (Vect cols n) -> Vect rows (Vect cols n) -> Vect rows (Vect col n)
--- add [] []               = []
--- add (x :: xs) (y :: ys) = (addHelper x y) :: (add xs ys)
-
 -- (Vect 2 (Vect 3 Int)) = [[1,2,3], [4,5,6]]
 
 headHelper : Vect (S n) a -> a
@@ -22,18 +18,22 @@ zerosVect : (n : Nat) -> Vect n (Vect 0 a)
 zerosVect Z     = []
 zerosVect (S n) = [] :: zerosVect n
 
-tpose : (n : Nat) -> Vect m (Vect n a) -> Vect n (Vect m a)
-tpose n []                    = zerosVect n
-tpose _ ([] :: _)             = []
-tpose _ xxs@(x@(_ :: _) :: _) = map headHelper xxs :: map tailHelper xxs
+tpose : Vect m (Vect n a) -> Vect n (Vect m a)
+tpose []                   = replicate _ [] -- taken from TDD with Idris Book
+tpose (ys@(y :: ys) :: xs) = map head (y :: ys :: xs :: []) ++ tpose (map tail (y :: ys :: xs :: []))
+
+-- tpose : (n : Nat) -> Vect m (Vect n a) -> Vect n (Vect m a)
+-- tpose n []                    = zerosVect n
+-- tpose _ ([] :: _)             = []
+-- tpose _ xxs@(x@(_ :: _) :: _) = map headHelper xxs :: map tailHelper xxs
 
 --
 -- foo : (n : Nat) -> Vect (S n) a -> Vect (S n) a
 -- foo n xs = xs
 
--- headOrEmpty : Vect n a -> Vect n a
--- headOrEmpty []       = []
--- headOrEmpty (x :: _) = [x]
+headOrEmpty : Vect n a -> Maybe a
+headOrEmpty []       = Nothing
+headOrEmpty (x :: _) = Just x
 
 f : Vect m a -> Vect m a
 f [] = []
