@@ -21,28 +21,22 @@ zerosVect (S n) = [] :: zerosVect n
 create_empties : Vect n (Vect 0 elem)
 create_empties = replicate _ []
 
--- [[1,2], [4,5]]
-
--- [1,2]  [[4], [5]]
-
--- [1,2,3]    [[4,7], [5,8], [6,9]]
-
-myZip : (x : Vect n elem) -> (xs: Vect n (Vect k elem)) -> Vect n (Vect (S k) elem)
-myZip []        _         = ?fff --create_empties
-myZip (y :: ys) (z :: zs) = (y :: z) :: myZip ys zs
-
-transpose_helper : (x : Vect n elem) -> (xs : Vect k (Vect n elem)) ->
-            (xs_trans : Vect n (Vect k elem)) -> Vect n (Vect (S k) elem)
-transpose_helper x []      xs_trans = ?hole -- map (::) x $ xs_trans
-transpose_helper x (y::ys) xs_trans = ?hole2 -- transpose_helper y ys $ map (::) x $ xs_trans
+-- got skeleton from book, and then figured out implementation
+transpose_helper : (x : Vect n elem) -> (xs_trans : Vect n (Vect k elem)) -> Vect n (Vect (S k) elem)
+transpose_helper [] []               = []
+transpose_helper (y :: ys) (z :: zs) =  (y :: z) :: (transpose_helper ys zs)
 
 -- [[1,2], [4,5], [7,8]] : 3 x 2
 -- [[1,4,7], [2,5,8]]    : 2 x 3
 
+zippy : Vect n elem -> Vect n elem -> Vect n (Vect 2 elem)
+zippy x y = zipWith (\a, b => [a, b]) x y
+
+-- autor: TDD with Idris
 transpose_mat : Vect m (Vect n elem) -> Vect n (Vect m elem)
 transpose_mat []      = create_empties
 transpose_mat (x::xs) = let xs_trans = transpose_mat xs in
-                        transpose_helper x xs xs_trans
+                        transpose_helper x xs_trans
 
 -- foo : (n : Nat) -> Vect (S n) a -> Vect (S n) a
 -- foo n xs = xs
