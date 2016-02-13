@@ -49,5 +49,9 @@ f : Vect m a -> Vect m a
 f [] = []
 f xs = xs
 
+create_empties_foo : Vect n (Vect 0 a)
+create_empties_foo {n = Z} = []
+create_empties_foo {n = (S k)} = [] :: create_empties_foo
+
 -- f : Vect (S Z) a -> Vect (S Z) a
 -- f x = x
