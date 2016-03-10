@@ -38,21 +38,30 @@ maxMaybe Nothing _         = Nothing
 maxMaybe _ Nothing         = Nothing
 maxMaybe (Just x) (Just y) = if (x > y) then Just x else Just y
 
-data PowerSource = Petrol | Pedal
+data PowerSource = Petrol | Pedal | Electric
 
 data Vehicle : PowerSource  -> Type where
   Bicycle : Vehicle Pedal
   Car : (fuel : Nat) -> Vehicle Petrol
+  ElectricCar : (charge : Nat) -> Vehicle Electric
   Bus : (fuel : Nat) -> Vehicle Petrol
+  Unicycle : Vehicle Pedal
+  Motorcycle : (fuel : Nat) -> Vehicle Petrol
 
 wheels : (Vehicle _) -> Nat
-wheels Bicycle = 2
-wheels (Car _) = 4
-wheels (Bus _) = 4
+wheels Bicycle         = 2
+wheels (Car _)         = 4
+wheels (Bus _)         = 4
+wheels (ElectricCar _) = 4
+wheels Unicycle        = 1
+wheels (Motorcycle _ ) = 2
 
 refuel : Vehicle Petrol -> Vehicle Petrol
 refuel (Car fuel) = Car 100
 refuel (Bus fuel) = Bus 100
+
+recharge : Vehicle Electric -> Vehicle Electric
+recharge (ElectricCar _) = ElectricCar 100
 
 data MyVect : Nat -> Type -> Type where
   Nil : MyVect Z a
@@ -89,3 +98,9 @@ sumEntries : Num a => (pos : Integer) -> Vect n a -> Vect n a -> Maybe a
 sumEntries {n} pos xs ys = case integerToFin pos n of
                         Just fin => Just $ sumEntriesHelper fin xs ys
                         Nothing  => Nothing
+
+-- data FooBarAge : Type -> Nat -> Type where
+--   Age : {n = 100} -> (Fin n) => Nat -> FooBarAge (Fin n)
+
+-- data FooBarAge : Type where
+--   Age : (age : Nat) -> .(ok : LTE age 100) -> FooBarAge
