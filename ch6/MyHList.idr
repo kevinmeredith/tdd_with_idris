@@ -12,5 +12,13 @@ import Data.Vect
 --   HListNil : MyHList _
 
 -- help from David C.
-data HList : List Type -> Type where
-   HL :
+-- data HL : List Type -> Type where
+--   Nil  : HL []
+--   HLCons : Type -> HL _ -> HL _
+
+data HL : List Type -> Type where
+  HLNil  : HL []
+  HLCons : x -> HL xs -> HL (x :: xs)
+
+f : (a :Type) -> a -> a
+f _ x = x
