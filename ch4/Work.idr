@@ -99,6 +99,9 @@ sumEntries {n} pos xs ys = case integerToFin pos n of
                         Just fin => Just $ sumEntriesHelper fin xs ys
                         Nothing  => Nothing
 
+getIndex : {n : Nat} -> (xs : Vect n a) -> (m : Nat) -> Maybe a
+getIndex {n} xs m = natToFin m n >>= \fin => return $ index fin xs
+
 -- data FooBarAge : Type -> Nat -> Type where
 --   Age : {n = 100} -> (Fin n) => Nat -> FooBarAge (Fin n)
 
