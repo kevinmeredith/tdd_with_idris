@@ -13,12 +13,10 @@ MatrixAny a n m = Vect n (Vect m a)
 -- TupleVect 1 ty = (ty, ())
 -- TupleVect 2 ty = (ty, (ty, ()))
 
-TupleVect (n : Nat) -> (a : Type) -> Type
-TupleVect Z      _ = ()
-TupleVect (S n)  a =
+TupleVectType : Nat -> (a : Type) -> Type
+TupleVectType Z     _ = ()
+TupleVectType (S n) a = (a, TupleVectType n a)
 
-TupleVect : a -> (n : Nat **
-TupleVect Z a     = (a)
+TupleVect : (n : Nat) -> a -> TupleVectType n a
+TupleVect Z _     = ()
 TupleVect (S n) a = (a, TupleVect n a)
-
--- 2 x 3 == Vect n (Vect 3 a)
