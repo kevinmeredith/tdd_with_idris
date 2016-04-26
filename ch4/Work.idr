@@ -1,4 +1,5 @@
 import Data.Vect
+import Data.String
 
 data Tree elem = Empty
                 | Node (Tree elem) elem (Tree elem)
@@ -101,6 +102,9 @@ sumEntries {n} pos xs ys = case integerToFin pos n of
 
 getIndex : {n : Nat} -> (xs : Vect n a) -> (m : Nat) -> Maybe a
 getIndex {n} xs m = natToFin m n >>= \fin => return $ index fin xs
+
+g : String -> Maybe Int
+g x = parsePositive x >>= \pos => return pos
 
 -- data FooBarAge : Type -> Nat -> Type where
 --   Age : {n = 100} -> (Fin n) => Nat -> FooBarAge (Fin n)

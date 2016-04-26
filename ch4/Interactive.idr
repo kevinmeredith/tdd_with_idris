@@ -1,58 +1,63 @@
 import Data.Vect
 import Data.String
 
-datastoreHelper : (acc : Vect n Nat) -> IO String
-datastoreHelper acc = do _    <- print "Command: "
-                         line <- getLine
-                         return line
-
-datastore : IO String
-datastore = datastoreHelper []
-
-data Command = Get Integer | Add String | Quit
+data Command = Get Nat | Add String | Quit
 data Action = Got String (Vect n String) | Added Nat (Vect n String) | ToQuit
-data CommandError = IdDoesNotExist (Vect n String) | IdIsNotNat (Vect n String) | EmptyAddInput (Vect n String)
-data ParseError = GetArgNotNat String (Vect n String) | FailedParse String (Vect n String)
-data MainError = PWrap ParseError | CWrap CommandError
+data CommandError = IdDoesNotExist
+data ParseError = GetArgNotNat String | FailedParse String
 
-addHelper : (xs: Vect n String) -> (x : String) -> Action
-addHelper {n} xs x = Added (n+1) (xs ++ [x])
+implementation Show CommandError where
+  show IdDoesNotExist = "IdDoesNotExist"
 
-getIndexHelper : {n : Nat} -> (xs : Vect n a) -> (m : Nat) -> Maybe a
-getIndexHelper {n} xs m = natToFin m n >>= \fin => return $ index fin xs
+implementation Show ParseError where
+  show (GetArgNotNat x) = "GetArgNotNat " ++ x
+  show (FailedParse xs) = "FailedParse " ++ xs
 
-getIndex : (acc : Vect n String) -> (m : Nat) -> Either MainError Action
-getIndex acc m = case getIndexHelper acc m of
+processCommandAddHelper : (xs: Vect n String) -> (x : String) -> Action
+processCommandAddHelper {n} xs x = Added (n+1) (xs ++ [x])
+
+getIndex : {n : Nat} -> (xs : Vect n a) -> (m : Nat) -> Maybe a
+getIndex {n} xs m = natToFin m n >>= \fin => return $ index fin xs
+
+processCommandGetHelper : (acc : Vect n String) -> (m : Nat) -> Either CommandError Action
+processCommandGetHelper acc m = case getIndex acc m of
                 Just result => Right $ Got result acc
-                Nothing     => Left $ CWrap $ IdDoesNotExist acc
+                Nothing     => Left IdDoesNotExist
 
 intToNat : (i : Integer) -> Maybe Nat
 intToNat i = case i `compare` 0 of
               LT => Nothing
               _  => Just $ cast i
 
-parseIntegerToNat : (i : Integer) -> (acc : Vect n String) -> Either MainError Action
-parseIntegerToNat i acc = case intToNat i of
-                            Just n  => getIndex acc n
-                            Nothing => Left $ CWrap $ IdIsNotNat acc
+processCommand : (acc : Vect n String) -> (c : Command) -> Either CommandError Action
+processCommand acc (Get m)  = processCommandGetHelper acc m
+processCommand _   Quit     = Right ToQuit
+processCommand acc (Add xs) = Right $ processCommandAddHelper acc xs
 
-processCommand : (acc : Vect n String) -> (c : Command) -> Either MainError Action
-processCommand acc (Get m) = parseIntegerToNat m acc
-processCommand _ Quit      = Right ToQuit
-processCommand _ (Add n)   = ?hole
+processInputHelper : (xs : String) -> Either ParseError Command
+processInputHelper xs = case (parsePositive xs >>= \i => intToNat i) of
+                         Nothing => Left $ GetArgNotNat xs
+                         Just n  => Right $ Get n
 
-getCmdHelper : (acc : Vect n String) -> (x : String) -> Either MainError Action
-getCmdHelper acc x = case parsePositive x of
-                      Nothing => Left $ PWrap $ GetArgNotNat x acc
-                      Just n  => processCommand acc (Get n)
+-- Given a String, return either an error or command to execute
+processInput : (cmd : String) -> Either ParseError Command
+processInput cmd = case unpack cmd of
+                        'g'::'e'::'t'::' '::xs => processInputHelper $ pack xs
+                        'a'::'d'::'d'::' '::xs => Right $ Add $ pack xs
+                        'q'::'u'::'i'::'t'::[] => Right Quit
+                        _                      => Left $ FailedParse cmd
 
--- TODO : String => Maybe Nat
--- https://groups.google.com/forum/#!topic/idris-lang/rYfdJ5jSUpY
-processStrInput : (acc : Vect n String) -> (cmd : String) -> Either MainError Action
-processStrInput acc cmd = case unpack cmd of
-                          'g'::'e'::'t'::' '::xs => getCmdHelper acc $ pack xs
-                          'a'::'d'::'d'::' '::xs => Right $ addHelper acc $ pack xs
-                          _                      => Left $ PWrap $ FailedParse cmd acc
+datastoreHelper : (acc : Vect n String) -> IO ()
+datastoreHelper acc = do _         <- printLn "Command: "
+                         line      <- getLine
+                         processed <- return $ processInput line
+                         case processed of
+                            Right cmd       => case processCommand acc cmd of
+                                                Right (Got str newAcc) => printLn str *> datastoreHelper newAcc
+                                                Right (Added n newAcc) => printLn n   *> datastoreHelper newAcc
+                                                Right ToQuit           => printLn "good bye!"
+                                                Left commandError      => printLn commandError *> datastoreHelper acc
+                            Left parseError => printLn parseError *> datastoreHelper acc
 
--- getCmdHelper : (acc : Vect n String) -> (x : String) -> Action
--- getCmdHelper x = addHelper acc x
+datastore : IO ()
+datastore = datastoreHelper []
