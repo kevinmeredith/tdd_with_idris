@@ -35,10 +35,10 @@ same_lists : {xs : List a} -> {ys : List a} -> x = y -> xs = ys -> x :: xs = y :
 same_lists refl1 refl2 = ?hole
 
 -- Exercise 3
-data ThreeEq : a -> b -> c -> Type
-  Same3 : x -> ThreeEq x x x
+data ThreeEq : a -> b -> c -> Type where
+  Same3 : x -> ThreeEq a b c
 
 -- Exercise 4
 
---allSameS : (x, y, z : Nat) -> ThreeEq x y z -> ThreeEq (S x) (S y) (S z)
---allSameS x y z (Same3 x) = cong (Same3 (S x))
+allSameS : (x, y, z : Nat) -> ThreeEq x y z -> ThreeEq (S x) (S y) (S z)
+allSameS x y z _ = Same3 (S x)
