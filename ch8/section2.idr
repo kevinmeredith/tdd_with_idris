@@ -25,5 +25,4 @@ append (x :: xs) ys = append_xs (x :: append xs ys)
 
 -- Problem 1
 myPlusCommutes : (n : Nat) -> (m : Nat) -> n + m = m + n
-myPlusCommutes Z m = rewrite plusZeroLeftNeutral m in m
-myPlusCommutes a b = ?hole
+myPlusCommutes Z m = sym (plusZeroRightNeutral m)
