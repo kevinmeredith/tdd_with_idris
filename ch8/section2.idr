@@ -26,3 +26,15 @@ append (x :: xs) ys = append_xs (x :: append xs ys)
 -- Problem 1
 myPlusCommutes : (n : Nat) -> (m : Nat) -> n + m = m + n
 myPlusCommutes Z m = sym (plusZeroRightNeutral m)
+
+-- Problem 2
+myReverseProof' : Vect (S (plus n len)) a -> Vect (plus n (S len)) a
+myReverseProof' {n} {len} xs = rewrite (plusSuccRightSucc n len) in xs
+
+myReverse' : Vect n a -> Vect n a
+myReverse' xs = myReverseHelper' [] xs
+  where myReverseHelper' : Vect n a -> Vect m a -> Vect (n+m) a
+        myReverseHelper' {n} acc []        = rewrite (plusZeroRightNeutral n) in acc
+        myReverseHelper' {n} acc (x :: xs) = myReverseProof' (myReverseHelper' (x::acc) xs)
+
+--rewrite (plusSuccRightSucc n 1) in (myReverse' (x::acc) xs)
