@@ -24,6 +24,9 @@ checkEqNat (S j) (S k) = case (checkEqNat j k) of
                            No contra => No (noRec contra)
 
 exactLength' : (len : Nat) -> (input : Vect m a) -> Maybe (Vect len a)
-exactLength' {m} len input = case decEq m len of
+exactLength'  {m} len input = case decEq m len of
                               Yes Refl  => Just input
                               No contra => Nothing
+
+headUnequal : DecEq a => {xs : Vect n a} -> {ys : Vect n a} -> (contra : (x = y) -> Void) -> ((x :: xs) = (y :: ys)) -> Void
+headUnequal {n} xs ys = ?h
