@@ -29,4 +29,27 @@ exactLength'  {m} len input = case decEq m len of
                               No contra => Nothing
 
 headUnequal : DecEq a => {xs : Vect n a} -> {ys : Vect n a} -> (contra : (x = y) -> Void) -> ((x :: xs) = (y :: ys)) -> Void
-headUnequal {n} xs ys = ?h
+headUnequal contra Refl = contra Refl
+
+tailUnequal : DecEq a => {xs : Vect n a} -> {ys : Vect n a} -> (contra : (xs = ys) -> Void) -> ((x :: xs) = (y :: ys)) -> Void
+tailUnequal contra Refl = contra Refl
+
+-- data DoorAction : DoorState -> DoorState -> Type where
+--   Open  : DoorAction DClosed DOpen
+--   Close : DoorAction DOpen DClosed
+
+data MyVect : (len : Nat) -> (elem : Type) -> Type where
+   MyCons  : (x  : elem) -> (xs : MyVect len elem) -> MyVect (S len) elem
+   Empty   : MyVect 0 elem
+
+b : (contra : (x = y) -> Void) -> (MyCons x xs = MyCons y ys) -> Void
+b contra Refl = contra Refl
+
+implementation (DecEq a) => DecEq (MyVect n a) where
+  decEq Empty         Empty         = Yes Refl
+  decEq (MyCons x xs) (MyCons y ys) = case (decEq x y) of
+                                        Yes prf   => decEq xs ys
+                                        No contra => No (b contra)
+  decEq _             _             = No ?k
+
+--   decEq : DecEq t => (x1 : t) -> (x2 : t) -> Dec (x1 = x2)
