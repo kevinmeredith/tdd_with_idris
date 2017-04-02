@@ -42,14 +42,14 @@ data MyVect : (len : Nat) -> (elem : Type) -> Type where
    MyCons  : (x  : elem) -> (xs : MyVect len elem) -> MyVect (S len) elem
    Empty   : MyVect 0 elem
 
-b : (contra : (x = y) -> Void) -> (MyCons x xs = MyCons y ys) -> Void
-b contra Refl = contra Refl
+noDecEq : (contra : (x = y) -> Void) -> (MyCons x xs = MyCons y ys) -> Void
+noDecEq contra Refl = contra Refl
 
 implementation (DecEq a) => DecEq (MyVect n a) where
   decEq Empty         Empty         = Yes Refl
   decEq (MyCons x xs) (MyCons y ys) = case (decEq x y) of
                                         Yes prf   => decEq xs ys
-                                        No contra => No (b contra)
+                                        No contra => No (noDecEq contra)
   decEq _             _             = No ?k
 
 --   decEq : DecEq t => (x1 : t) -> (x2 : t) -> Dec (x1 = x2)
