@@ -39,13 +39,13 @@ headEqual x y = case decEq x y of
                   Yes Refl  => Just (Yes Refl)
                   No contra => Nothing
 
-vectEqual : DecEq a => (xs : Vect n a) -> (ys : Vect n a) -> Maybe (Dec (xs = ys))
-vectEqual []         []         = Just (Yes Refl)
-vectEqual (x :: xxs) (y :: yys) = case headEqual x y of
-                                  Just (Yes prf) => vectEqual xxs yys
-                                  No contra      => Nothing
-vectEqual (x :: xxs) []         = Nothing
-vectEqual []         (y :: yys) = Nothing
+-- vectEqual : DecEq a => (xs : Vect n a) -> (ys : Vect n a) -> Maybe (Dec (xs = ys))
+-- vectEqual []         []         = Just (Yes Refl)
+-- vectEqual (x :: xxs) (y :: yys) = case headEqual x y of
+--                                   Just (Yes prf) => vectEqual xxs yys
+--                                   No contra      => Nothing
+-- vectEqual (x :: xxs) []         = Nothing
+-- vectEqual []         (y :: yys) = Nothing
 
 data MyVect : (len : Nat) -> (elem : Type) -> Type where
    MyCons  : (x  : elem) -> (xs : MyVect len elem) -> MyVect (S len) elem
@@ -54,11 +54,22 @@ data MyVect : (len : Nat) -> (elem : Type) -> Type where
 noDecEq : (contra : (x = y) -> Void) -> (MyCons x xs = MyCons y ys) -> Void
 noDecEq contra Refl = contra Refl
 
+noHead : (contra : (x = y) -> Void) -> (MyCons x xs = MyCons y ys) -> Void
+noHead contra Refl = contra Refl
+
+noTail : (contra : (xs = ys) -> Void) -> (MyCons x xs = MyCons x ys) -> Void
+noTail contra Refl = contra Refl
+
+yesTail : (prf : xs = ys) -> Dec (MyCons x xs = MyCons x ys)
+yesTail Refl = Yes Refl
+
 -- http://stackoverflow.com/questions/43207417/understanding-deceq
 implementation (DecEq a) => DecEq (MyVect n a) where
-  decEq Empty         Empty         = Yes Refl
-  decEq (MyCons x xs) (MyCons y ys) = case (decEq x y) of
-                                        Yes prf   => ?y
-                                        No contra => No (noDecEq contra)
+  decEq Empty         Empty                         = Yes Refl
+  decEq (MyCons x xs) (MyCons y ys)   with (decEq x y)
+    decEq (MyCons x xs) (MyCons x ys) |     (Yes Refl)  = case decEq xs ys of
+                                                        Yes prf   => yesTail prf
+                                                        No contra => No (noTail contra)
+    decEq (MyCons x xs) (MyCons y ys) |     (No contra) = No (noHead contra)
 
 --   decEq : DecEq t => (x1 : t) -> (x2 : t) -> Dec (x1 = x2)
