@@ -28,16 +28,19 @@ removeElem {n = (S k)} value (y :: ys) (There later) = y :: (removeElem value ys
 removeElem_auto : (value : a) -> (xs : Vect (S n) a) -> {auto prf : Elem value xs} -> Vect n a
 removeElem_auto value xs {prf} = removeElem value xs prf
 
-notInTail : Elem value (x :: xs) -> Void
-notInTail _ = ?a
+notInTail : (notThere : Elem value xs -> Void) ->
+            (notHere : (value = x) -> Void)    ->
+            Elem value (x :: xs) -> Void
+notInTail notThere notHere Here          = notHere Refl
+notInTail notThere notHere (There later) = notThere later
 
 isElem' : DecEq ty => (value : ty) -> (xs : Vect n ty) -> Dec (Elem value xs)
 isElem' value []      = No absurd
 isElem' value (x::xs) = case (decEq value x) of
                          Yes Refl   => Yes Here
-                         No notHead => case isElem' value xs of
+                         No notHere => case isElem' value xs of
                                        Yes prf     => Yes (There prf)
-                                       No notThere => No notInTail
+                                       No notThere => No (notInTail notThere notHere)
 
 stringOrInt : Bool -> Type
 stringOrInt True = String
